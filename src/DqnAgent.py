@@ -35,3 +35,18 @@ class DqnAgent:
         # Replay buffer for storing experiences
         self.replay_buffer = ReplayBuffer(max_size=10000)
         self.batch_size = 64  # Batch size for training
+
+    # Selects an action based on epsilon-greedy policy
+    def select_action(self, state):
+        if random.random() < self.epsilon:
+            # Exploration mode is entered if less than epsilon value
+            # In CartPole, 0 = Left, 1 = Right
+            return np.random.choice([0, 1])
+        else:
+            # Exploitation mode is entered otherwise
+            # convert the state to a pytorch tensor
+            state_tensor = torch.tensor(state, dtype=torch.float32)
+            # Get Q-values from the Q-network
+            q_values = self.q_network(state_tensor)
+            # Return the action with the highest Q-value
+            return torch.argmax(q_values).item()
