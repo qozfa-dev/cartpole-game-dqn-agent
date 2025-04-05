@@ -21,13 +21,17 @@ def train_dqn(agent, env, episodes=1000):
             state = next_state
             total_reward += reward
 
+            # Render the environment to see the CartPole in action
+            env.render()
+
         total_rewards.append(total_reward)
         print(
             f"Episode {episode+1}/{episodes} - Total Reward: {total_reward}, Epsilon: {agent.epsilon}")
 
+        # Save model periodically
         if (episode + 1) % 100 == 0:
             plt.plot(total_rewards)
-            plt.savefig('results/training_progress.png')
+            plt.savefig('training_progress.png')
 
     return total_rewards
 

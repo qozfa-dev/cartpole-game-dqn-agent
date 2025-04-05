@@ -78,7 +78,7 @@ class DqnAgent:
         # Calculate target Q-values using the Bellman equation
         target_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
 
-        # Compute the loss (mean squared error)
+        # Compute the loss using mean squared error
         loss = torch.nn.MSELoss()(current_q_values, target_q_values)
 
         # Backpropagation: Update Q-network weights
@@ -90,6 +90,6 @@ class DqnAgent:
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
-        # Periodically copy weights from Q-network to target network
+        # Periodically copy weights from Q-network to target network to maintain stability
         if self.epsilon % 100 == 0:
             self.target_network.load_state_dict(self.q_network.state_dict())
