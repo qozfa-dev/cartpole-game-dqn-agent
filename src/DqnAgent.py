@@ -50,3 +50,46 @@ class DqnAgent:
             q_values = self.q_network(state_tensor)
             # Return the action with the highest Q-value
             return torch.argmax(q_values).item()
+
+    # Trains the Q-network using experiences from the replay buffer
+    def train(self):
+        # Ensure there are enough experiences in the buffer before training
+        if self.replay_buffer.size() < self.batch_size:
+            return
+
+        # Sample a batch of experiences from the replay buffer
+        batch = self.replay_buffer.sample(self.batch_size)
+        states, actions, rewards, next_states, dones = zip(*batch)
+
+        # Convert to torch tensors
+        states = torch.tensor(states, dtype=torch.float32)
+        actions = torch.tensor(actions, dtype=torch.long)
+        rewards = torch.tensor(rewards, dtype=torch.float32)
+        next_states = torch.tensor(next_states, dtype=torch.float32)
+        dones = torch.tensor(dones, dtype=torch.float32)
+
+        # Get Q-values for current states
+        q_values = self.q_network(states)
+        current_q_values = q_values.gather(1, actions.unsqueeze(1)).squeeze(1)
+
+        # Get Q-values for next states (using the target network)
+        next_q_values = self.target_network(next_states).max(1)[0]
+
+        # Calculate target Q-values using the Bellman equation
+        target_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
+
+        # Compute the loss (mean squared error)
+        loss = torch.nn.MSELoss()(current_q_values, target_q_values)
+
+        # Backpropagation: Update Q-network weights
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        # Update epsilon (decrease exploration over time)
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+
+        # Periodically copy weights from Q-network to target network
+        if self.epsilon % 100 == 0:
+            self.target_network.load_state_dict(self.q_network.state_dict())
