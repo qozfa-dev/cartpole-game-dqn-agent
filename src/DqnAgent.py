@@ -9,7 +9,7 @@ from replay_buffer import ReplayBuffer
 
 class DqnAgent:
     # Initialises the DQN Agent with parameters
-    def __init__(self, input_dim, output_dim, learning_rate=0.001, gamma=0.99, epsilon=1.0, epsilon_decay=0.995, epsilon_min=0.01):
+    def __init__(self, input_dim, output_dim, learning_rate=0.0005, gamma=0.99, epsilon=1.0, epsilon_decay=0.990, epsilon_min=0.01):
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.learning_rate = learning_rate
